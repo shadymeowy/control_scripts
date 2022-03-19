@@ -153,10 +153,9 @@ x, y, z, yaw, t = calc_path(
 
 N = len(x)
 
-
 async def run():
     drone = System()
-    # await drone.connect(system_address="udp://:14551")
+    #await drone.connect(system_address="udp://:14551")
     await drone.connect(system_address="serial:///dev/ttyAMA0:460800")
 
     print("Waiting for drone to connect...")
@@ -187,9 +186,6 @@ async def run():
     async for armed in drone.telemetry.armed():
         if armed:
             break
-
-    await drone.action.takeoff()
-    await asyncio.sleep(10)
 
     print("-- Setting initial setpoint")
     await drone.offboard.set_position_ned(PositionNedYaw(0.0, 0.0, 0.0, 0.0))
