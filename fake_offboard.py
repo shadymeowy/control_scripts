@@ -59,6 +59,11 @@ def calc_path(pointss, dls=[], speed=20, x0=0, y0=0, z0=-2, yaw0=0, focal_points
             yaw.append(yaw_)
             t_ += WAIT_TIME
             t.append(t_)
+        x.append(None)
+        y.append(None)
+        z.append(None)
+        yaw.append(None)
+        t.append(None)
 
     return x, y, z, yaw, t
 
@@ -68,75 +73,33 @@ def calc_shape(path, length=(5, 5, 5), offset=(0, 0, 1), rvrs=(1, 1, -1)):
 
 
 triangle = [
-    [0.43301270189, 0, 0],
-    [-0.43301270189, 0.5, 0],
-    [-0.43301270189, -0.5, 0],
-
-    [0.43301270189, 0, 0],
-    [-0.43301270189, 0.5, 0],
-    [-0.43301270189, -0.5, 0],
-
-    [0.43301270189, 0, 0],
-    [-0.43301270189, 0.5, 0],
-    [-0.43301270189, -0.5, 0],
-
-    [0.43301270189, 0, 0],
-    [-0.43301270189, 0.5, 0],
-    [-0.43301270189, -0.5, 0],
-
-    [0, 0, 0]
+    [1.3535533905932737, 1.3535533905932737, 0],
+    [0.6464466094067263, 0.6464466094067263, 0],
+    [0.38762756430420553, 1.6123724356957947, 0],
+    [1.3535533905932737, 1.3535533905932737, 0],
+    [1.6123724356957945, 0.3876275643042054, 0]
 ]
-focal_point = calc_shape([[-0.1443375673, 0, 0]])[0]
+focal_point = calc_shape([[0.7958758547680685, 1.2041241452319316, 0]])[0]
 
 cube = [
-    [-0.5, -0.5, 0],
-    [-0.5, 0.5, 0],
-    [-0.5, 0.5, 1],
+    [0.5, 0.5, 0],
+    [0.5, 1.5, 0],
+    [0.5, 1.5, 1],
+    [1.5, 1.5, 1],
+    [1.5, 0.5, 1],
     [0.5, 0.5, 1],
-    [0.5, -0.5, 1],
-    [-0.5, -0.5, 1],
-    [-0.5, 0.5, 1],
-    [-0.5, -0.5, 1],
-    [-0.5, -0.5, 0],
-    [0.5, -0.5, 0],
-    [0.5, -0.5, 1],
+    [0.5, 1.5, 1],
     [0.5, 0.5, 1],
     [0.5, 0.5, 0],
-    [-0.5, 0.5, 0],
-    [0.5, -0.5, 0],
-    [0.5, 0.5, 0],
-    [0.43301270189, 0, 0],
+    [1.5, 0.5, 0],
+    [1.5, 0.5, 1],
+    [1.5, 1.5, 1],
+    [1.5, 1.5, 0],
+    [0.5, 1.5, 0],
+    [1.5, 0.5, 0],
+    [1.5, 1.5, 0],
+    [1.6123724356957945, 0.3876275643042054, 0]
 ]
-
-triangle = [
-    [0.3535533905932738, 0.35355339059327373, 0],
-    [-0.3535533905932738, -0.35355339059327373, 0],
-    [-0.6123724356957945, 0.6123724356957946, 0],
-    [0.3535533905932738, 0.35355339059327373, 0],
-    [0.6123724356957945, -0.6123724356957946, 0],
-]
-focal_point = calc_shape([[-0.20412414523193148, 0.2041241452319315, 0]])[0]
-
-cube = [
-    [-0.5, -0.5, 0],
-    [-0.5, 0.5, 0],
-    [-0.5, 0.5, 1],
-    [0.5, 0.5, 1],
-    [0.5, -0.5, 1],
-    [-0.5, -0.5, 1],
-    [-0.5, 0.5, 1],
-    [-0.5, -0.5, 1],
-    [-0.5, -0.5, 0],
-    [0.5, -0.5, 0],
-    [0.5, -0.5, 1],
-    [0.5, 0.5, 1],
-    [0.5, 0.5, 0],
-    [-0.5, 0.5, 0],
-    [0.5, -0.5, 0],
-    [0.5, 0.5, 0],
-    [0.6123724356957945, -0.6123724356957946, 0],
-]
-
 
 x, y, z, yaw, t = calc_path(
     [calc_shape(cube), calc_shape(triangle)],
@@ -146,10 +109,11 @@ x, y, z, yaw, t = calc_path(
 
 N = len(x)
 
+
 async def run():
     drone = System()
-    await drone.connect(system_address="udp://:14551")
-    #await drone.connect(system_address="serial:///dev/ttyAMA0:460800")
+    #await drone.connect(system_address="udp://:14551")
+    await drone.connect(system_address="serial:///dev/ttyAMA0:460800")
 
     print("Waiting for drone to connect...")
     async for state in drone.core.connection_state():
@@ -185,11 +149,17 @@ async def run():
     await asyncio.sleep(10)
 
     for i in range(N):
+        if x[i] is None:
+            continue
         x[i], y[i] = cos(yaw0) * x[i] - sin(yaw0) * y[i], sin(yaw0) * x[i] + cos(yaw0) * y[i]
         yaw[i] += yaw0 * 180 / np.pi
         yaw[i] %= 360
 
     for point in zip(x, y, z, yaw):
+        if point[0] is None:
+            await asyncio.sleep(5)
+            continue
+
         target = ned2geodetic(*(point[:-1]), *pg0)
         print("-- Going to: {}".format(target))
 
@@ -200,14 +170,6 @@ async def run():
                 print("-- Reached target")
                 break
             print("\f-- Position: ({})".format(position))
-
-    await asyncio.sleep(1)
-
-    print("-- Stopping offboard")
-    try:
-        await drone.offboard.stop()
-    except OffboardError as error:
-        print(f"Stopping offboard mode failed with error code: {error._result.result}")
 
     await asyncio.sleep(1)
 
