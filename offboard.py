@@ -136,8 +136,8 @@ N = len(x)
 
 async def run():
     drone = System()
-    await drone.connect(system_address="udp://:14551")
-    #await drone.connect(system_address="serial:///dev/ttyAMA0:460800")
+    # await drone.connect(system_address="udp://:14551")
+    await drone.connect(system_address="serial:///dev/ttyAMA0:460800")
 
     print("Waiting for drone to connect...")
     async for state in drone.core.connection_state():
@@ -167,9 +167,6 @@ async def run():
     async for armed in drone.telemetry.armed():
         if armed:
             break
-
-    # print("-- Arming")
-    # await drone.action.arm()
 
     await drone.action.takeoff()
     await asyncio.sleep(10)
