@@ -67,24 +67,6 @@ def calc_shape(path, length=(5, 5, 5), offset=(0, 0, 1), rvrs=(1, 1, -1)):
 
 
 triangle = [
-    [0.866, 0.5, 0],
-    [0.866, -0.5, 0],
-    [1.732, 0, 0],
-    [0.866, 0.5, 0],
-    [0.866, -0.5, 0],
-    [1.732, 0, 0],
-    [0.866, 0.5, 0],
-    [0.866, -0.5, 0],
-    [1.732, 0, 0],
-    [0.866, 0.5, 0],
-    [0.866, -0.5, 0],
-    [1.732, 0, 0],
-    [0.866, 0.5, 0],
-    [0, 0, 0]
-]
-focal_point = calc_shape([[1.1547, 0, 0]])[0]
-
-triangle2 = [
     [0.43301270189, 0, 0],
     [-0.43301270189, 0.5, 0],
     [-0.43301270189, -0.5, 0],
@@ -103,7 +85,7 @@ triangle2 = [
 
     [0, 0, 0]
 ]
-focal_point2 = calc_shape([[-0.1443375673, 0, 0]])[0]
+focal_point = calc_shape([[-0.1443375673, 0, 0]])[0]
 
 cube = [
     [-0.5, -0.5, 0],
@@ -127,8 +109,8 @@ cube = [
 
 
 x, y, z, yaw, t = calc_path(
-    [calc_shape(cube), calc_shape(triangle2)],
-    focal_points=[None, focal_point2]
+    [calc_shape(cube), calc_shape(triangle)],
+    focal_points=[None, focal_point]
 )
 
 N = len(x)
