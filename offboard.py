@@ -1,12 +1,3 @@
-#!/usr/bin/env python3
-
-"""
-Caveat when attempting to run the examples in non-gps environments:
-`drone.offboard.stop()` will return a `COMMAND_DENIED` result because it
-requires a mode switch to HOLD, something that is currently not supported in a
-non-gps environment.
-"""
-
 import asyncio
 from math import sqrt
 
@@ -107,45 +98,6 @@ cube = [
     [0.43301270189, 0, 0],
 ]
 
-triangle = [
-    [0.3535533905932738, 0.35355339059327373, 0],
-    [-0.3535533905932738, -0.35355339059327373, 0],
-    [-0.6123724356957945, 0.6123724356957946, 0],
-
-    [0.3535533905932738, 0.35355339059327373, 0],
-    [-0.3535533905932738, -0.35355339059327373, 0],
-    [-0.6123724356957945, 0.6123724356957946, 0],
-
-    [0.3535533905932738, 0.35355339059327373, 0],
-    [-0.3535533905932738, -0.35355339059327373, 0],
-    [-0.6123724356957945, 0.6123724356957946, 0],
-
-    [0.3535533905932738, 0.35355339059327373, 0],
-    [0.6123724356957945, -0.6123724356957946, 0],
-]
-focal_point = calc_shape([[-0.20412414523193148, 0.2041241452319315, 0]])[0]
-
-cube = [
-    [-0.5, -0.5, 0],
-    [-0.5, 0.5, 0],
-    [-0.5, 0.5, 1],
-    [0.5, 0.5, 1],
-    [0.5, -0.5, 1],
-    [-0.5, -0.5, 1],
-    [-0.5, 0.5, 1],
-    [-0.5, -0.5, 1],
-    [-0.5, -0.5, 0],
-    [0.5, -0.5, 0],
-    [0.5, -0.5, 1],
-    [0.5, 0.5, 1],
-    [0.5, 0.5, 0],
-    [-0.5, 0.5, 0],
-    [0.5, -0.5, 0],
-    [0.5, 0.5, 0],
-    [0.6123724356957945, -0.6123724356957946, 0],
-]
-
-
 x, y, z, yaw, t = calc_path(
     [calc_shape(cube), calc_shape(triangle)],
     focal_points=[None, focal_point]
@@ -153,10 +105,11 @@ x, y, z, yaw, t = calc_path(
 
 N = len(x)
 
+
 async def run():
     drone = System()
     await drone.connect(system_address="udp://:14551")
-    #await drone.connect(system_address="serial:///dev/ttyAMA0:460800")
+    # await drone.connect(system_address="serial:///dev/ttyAMA0:460800")
 
     print("Waiting for drone to connect...")
     async for state in drone.core.connection_state():
