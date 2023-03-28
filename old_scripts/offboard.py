@@ -3,6 +3,7 @@ from math import sqrt
 
 from mavsdk import System
 from mavsdk.offboard import (OffboardError, PositionNedYaw)
+from mavsdk.action import ActionError
 from time import perf_counter
 import numpy as np
 
@@ -102,7 +103,7 @@ N = len(x)
 
 async def run():
     drone = System()
-    await drone.connect(system_address="udp://:14551")
+    await drone.connect(system_address="udp://:14540")
     # await drone.connect(system_address="serial:///dev/ttyAMA0:460800")
 
     print("Waiting for drone to connect...")
@@ -129,10 +130,18 @@ async def run():
         yaw0 *= np.pi / 180
         break
 
-    print("-- Wait for arming")
-    async for armed in drone.telemetry.armed():
-        if armed:
+    async for is_armed in drone.telemetry.armed():
+        if is_armed:
+            print('-- The vehicle is already armed.')
             break
+        else:
+            print("-- Arming")
+            try:
+                await drone.action.arm()
+                break
+            except ActionError as error:
+                print(f"Arming failed with error code:{error._result.result}")
+                await asyncio.sleep(1)
 
     print("-- Setting initial setpoint")
     await drone.offboard.set_position_ned(PositionNedYaw(0.0, 0.0, 0.0, 0.0))
