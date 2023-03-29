@@ -6,11 +6,12 @@ from mavsdk.action import ActionError
 from time import perf_counter
 import numpy as np
 
-from math import sqrt, cos, sin
+from math import sqrt, cos, sin, atan2
+import time
 
-WAIT_TIME = 1
+WAIT_TIME = 0.3
 ROUNDS = 5
-
+LENGTH = (5,5,5)
 
 def calc_path(pointss, dl=0.005, speed=20, x0=0, y0=0, z0=-2, yaw0=0, focal_points=[]):
     x = []
@@ -54,9 +55,47 @@ def calc_path(pointss, dl=0.005, speed=20, x0=0, y0=0, z0=-2, yaw0=0, focal_poin
     return x, y, z, yaw, t
 
 
-def calc_shape(path, length=(5, 5, 5), offset=(0, 0, 1), rvrs=(1, 1, -1)):
-    return [[rvrs[k] * (p[k] * length[k] + offset[k]) for k in range(3)] for p in path] # Is that even legal? 
+def calc_shape(path, length=LENGTH, offset=(0, 0, 1), rvrs=(1, 1, -1)):
+    return [[rvrs[k] * (p[k] * length[k] + offset[k]) for k in range(3)] for p in path]
 
+def circulate_shape(shape, length=LENGTH, radius=0.14, dlc=0.02, drp=np.pi/4):
+    '''
+    dlr: The length of change of position for the center of rotation in each step
+    dlc: The rotation angle applied in each step
+    If there is a high risk of failure use smaller values for the radius.
+    '''
+    center_point = [0,0,0]
+    focals = []
+    shape_ = []
+    rotation = 0
+    for target_point in shape:
+        tx, ty, tz = target_point
+        cx, cy, cz = center_point
+        heading_angle = atan2(tx-cx, ty-cy) #Not in a formal way
+        while True:
+            if (cx - tx)**2 + (cy - ty)**2 + (cz - tz)**2 <= dlc**2:
+                target_point = center_point
+                break
+            nx = cx+radius*sin(rotation)
+            ny = cy+radius*cos(rotation)
+            nz = cz 
+            new_point = [nx, ny, nz]
+            shape_.append(new_point)
+
+            rotation += drp
+            cx += dlc*sin(heading_angle)
+            cy += dlc*cos(heading_angle)
+            cz = cz 
+            center_point = [cx, cy, cz]
+            focals.append(center_point)
+    return shape_, focals
+
+def mission_decomposition(mission):
+    item_list = []     
+    for point in mission:
+        item = [point]
+        item_list.append(item)
+    return item_list
 
 triangle = [
     *(
@@ -108,16 +147,13 @@ mission_2_path = [
     [1.4, 1.4, 0]
 ]   
 
-x, y, z, yaw, t = calc_path(
-    [calc_shape(mission_2_path)],
-    focal_points=[None]
-)
+mission_shape, focals = circulate_shape(mission_2_path)
+mission_shape = mission_decomposition(mission_shape)
 
-'''
 x, y, z, yaw, t = calc_path(
-    [calc_shape(cube), calc_shape(triangle)],
-    focal_points=[None, focal_point]
-)'''
+    [calc_shape(mission_shape[i]) for i in range(len(mission_shape))],
+    focal_points=calc_shape([focals[i] for i in range(len(focals))])
+)
 
 N = len(x)
 
