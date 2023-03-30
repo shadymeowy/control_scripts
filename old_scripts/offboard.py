@@ -9,8 +9,8 @@ import numpy as np
 
 from math import sqrt, cos, sin
 
-WAIT_TIME = 3
-ROUNDS = 5
+WAIT_TIME = 2
+ROUNDS = 2
 
 
 def calc_path(pointss, dl=0.005, speed=20, x0=0, y0=0, z0=-2, yaw0=0, focal_points=[]):
@@ -55,7 +55,7 @@ def calc_path(pointss, dl=0.005, speed=20, x0=0, y0=0, z0=-2, yaw0=0, focal_poin
     return x, y, z, yaw, t
 
 
-def calc_shape(path, length=(5, 5, 5), offset=(0, 0, 1), rvrs=(1, 1, -1)):
+def calc_shape(path, length=(3, 3, 3), offset=(0, 0, 1), rvrs=(1, 1, -1)):
     return [[rvrs[k] * (p[k] * length[k] + offset[k]) for k in range(3)] for p in path]
 
 
@@ -103,8 +103,9 @@ N = len(x)
 
 async def run():
     drone = System()
-    await drone.connect(system_address="udp://:14540")
-    # await drone.connect(system_address="serial:///dev/ttyAMA0:460800")
+    #await drone.connect(system_address="udp://:14540")
+    print("hi")
+    await drone.connect(system_address="serial:///dev/ttyACM0:921600")
 
     print("Waiting for drone to connect...")
     async for state in drone.core.connection_state():

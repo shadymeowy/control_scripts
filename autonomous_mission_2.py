@@ -136,16 +136,16 @@ mission_2_path = [
     [1.1 + 0.2*sin(5*np.pi/6), 0.2 + 0.2*cos(5*np.pi/6), 0],
     [1.1 + 0.2*sin(4*np.pi/6), 0.2 + 0.2*cos(4*np.pi/6), 0],
     [1.3, 0.2, 0], #Radial 1 end
-    [1.3, 0.6, 0], 
+    [1.3, 0.6, 0],
     [0.5, 0.6, 0], #Radial 2 start
     [0.5 + 0.4*sin(7*np.pi/6), 1 + 0.4*cos(7*np.pi/6), 0],
     [0.5 + 0.4*sin(8*np.pi/6), 1 + 0.4*cos(8*np.pi/6), 0],
-    [0.5 + 0.4*sin(9*np.pi/6), 1 + 0.4*cos(9*np.pi/6), 0], #[0.1, 1, 0], 
+    [0.5 + 0.4*sin(9*np.pi/6), 1 + 0.4*cos(9*np.pi/6), 0], #[0.1, 1, 0],
     [0.5 + 0.4*sin(10*np.pi/6), 1 + 0.4*cos(10*np.pi/6), 0],
     [0.5 + 0.4*sin(11*np.pi/6), 1 + 0.4*cos(11*np.pi/6), 0],
     [0.5, 1.4, 0], #Radial 2 end
     [1.4, 1.4, 0]
-]   
+]
 
 mission_shape, focals = circulate_shape(mission_2_path)
 mission_shape = mission_decomposition(mission_shape)
@@ -160,8 +160,8 @@ N = len(x)
 
 async def run():
     drone = System()
-    await drone.connect(system_address="udp://:14540")
-    # await drone.connect(system_address="serial:///dev/ttyAMA0:460800")
+    #await drone.connect(system_address="udp://:14540")
+    await drone.connect(system_address="serial:///dev/ttyACM0:921600")
 
     print("Waiting for drone to connect...")
     async for state in drone.core.connection_state():
