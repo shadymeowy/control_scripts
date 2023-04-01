@@ -11,7 +11,7 @@ import time
 
 WAIT_TIME = 0.3
 ROUNDS = 5
-LENGTH = (5,5,5)
+LENGTH = (4.5, 4.5, 4.5)
 
 def calc_path(pointss, dl=0.005, speed=20, x0=0, y0=0, z0=-2, yaw0=0, focal_points=[]):
     x = []
